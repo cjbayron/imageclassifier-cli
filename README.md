@@ -14,7 +14,7 @@ An easy-to-use CLI tool for training and testing image classifiers.
 
 ### Prerequisites
 
-* Python 3.5.2
+* Python3
 * Numpy
 * TensorFlow
 
@@ -92,23 +92,26 @@ First of all, you have to gather and organize your image data!
 This CLI expects the following directory structure for DATA_DIR (location of images):
 
 ```
-DATA_DIR/<class0>/image1.png
-DATA_DIR/<class0>/image2.png
+DATA_DIR
+│
+├── <class0>
+│   ├── image1.png
+│   ├── image2.png
+│   ...
+│   └── imageN.png
+│
+├── <class1>
+│   ├── image1.png
+│   ├── image2.png
+│   ...
+│   └── imageN.png
 ...
-DATA_DIR/<class0>/imageN.png
-
-DATA_DIR/<class1>/image1.png
-DATA_DIR/<class1>/image2.png
-...
-DATA_DIR/<class1>/imageN.png
-
-...
-...
-
-DATA_DIR/<classN>/image1.png
-DATA_DIR/<classN>/image2.png
-...
-DATA_DIR/<classN>/imageN.png
+│
+└── <classN>
+    ├── image1.png
+    ├── image2.png
+    ...
+    └── imageN.png
 ```
 
 As mentioned, this CLI assumes all these images to be of same size.  
