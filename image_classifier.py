@@ -86,7 +86,7 @@ class ImageClassifier():
                 # update counters and save model
                 processed_num += const.BATCH_SIZE
                 if processed_num >= num_data:
-                    processed_num = 0
+                    processed_num = processed_num % const.BATCH_SIZE
                     if epoch_num % const.NUM_EPOCH_BEFORE_CHKPT == 0 \
                         and epoch_num != const.NUM_EPOCHS:
                         ut.save_model(epoch_num, self.arch_name,
