@@ -107,6 +107,8 @@ venv.bak/
 data/*
 models/*
 records/*
+tf_records_test.py
+tf_dataset_test.py
 
 # keep folders
 !data/.gitkeep
