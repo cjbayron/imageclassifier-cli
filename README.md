@@ -137,25 +137,45 @@ python3 imageclassifier_cli.py \
 -m trn_prep \
 -d data/cifar/train \
 -r cifar_train_img \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
 The above command will do the following:
 1. Collect all images in *data/cifar/train* along with their corresponding labels  
 and store them in TFRecords file format in *records/cifar_train_img.tfrecords*
-2. Train image model with *SimpleANN* architecture (see **arch/arch.py**) using data in TFRecords file  
+2. Train image model with *TFCNN* architecture (see **arch/arch.py**) using data in TFRecords file  
     - the number of Epoch, Processed Images, and Loss value are printed
 3. Save trained model in following path:  
-*models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
+*models/TFCNN/\<datetime\>\_TFCNN\_cifar\_\<epoch\>.mdl.data*
     - the number of saved models may be varied in **common/constants.py**
+
+**Sample output:**
+```
+Found 50000 images. Creating TF records... 
+Done.
+Training on 50000 images for 5 epochs...
+[2018-09-02 20:59:40.869] Epoch: 1/5, Processed: 0/50000, Loss: 3.386968
+[2018-09-02 20:59:41.252] Epoch: 1/5, Processed: 3200/50000, Loss: 1.743668
+[2018-09-02 20:59:41.638] Epoch: 1/5, Processed: 6400/50000, Loss: 2.058634
+[2018-09-02 20:59:42.035] Epoch: 1/5, Processed: 9600/50000, Loss: 1.742383
+[2018-09-02 20:59:42.428] Epoch: 1/5, Processed: 12800/50000, Loss: 1.573048
+...
+
+[2018-09-02 21:21:44.043] Epoch: 20/20, Processed: 35600/50000, Loss: 0.049832
+[2018-09-02 21:21:45.492] Epoch: 20/20, Processed: 38800/50000, Loss: 0.039704
+[2018-09-02 21:21:46.948] Epoch: 20/20, Processed: 42000/50000, Loss: 0.117836
+[2018-09-02 21:21:48.396] Epoch: 20/20, Processed: 45200/50000, Loss: 0.006848
+[2018-09-02 21:21:49.842] Epoch: 20/20, Processed: 48400/50000, Loss: 0.029094
+Model saved in path: models/TFCNN/20180902_2121_TFCNN_cifar_20.mdl
+```
 
 **To re-run same training without TFRecords preparation, use:**
 ```
 python3 imageclassifier_cli.py \
 -m trn \
 -r records/cifar_train_img.tfrecords \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
@@ -169,7 +189,7 @@ python3 imageclassifier_cli.py \
 -m tst_prep \
 -d data/cifar/test \
 -r cifar_test_img \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
@@ -177,17 +197,36 @@ The above command will do the following:
 1. Collect all images in *data/cifar/test* along with their corresponding labels  
 and store them in TFRecords file format in *records/cifar_test_img.tfrecords*
 2. Load pre-trained image model with latest epoch in following path:  
-*models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
+*models/TFCNN/\<datetime\>\_TFCNN\_cifar\_\<epoch\>.mdl.data*
 3. Classify data in TFRecords file using loaded model
     - number of processed images is printed during execution
 4. Print (and save to log file) the accuracy
+
+**Sample output:**
+```
+Found 10000 images. Creating TF records... 
+Done.
+[2018-09-02 21:24:47.251] Starting classification. Using model in:
+models/TFCNN/20180902_2121_TFCNN_cifar_20.mdl
+[2018-09-02 21:24:49.584] Processed 100/10000 images
+[2018-09-02 21:24:49.728] Processed 1100/10000 images
+[2018-09-02 21:24:49.866] Processed 2100/10000 images
+[2018-09-02 21:24:50.005] Processed 3100/10000 images
+[2018-09-02 21:24:50.144] Processed 4100/10000 images
+[2018-09-02 21:24:50.281] Processed 5100/10000 images
+[2018-09-02 21:24:50.418] Processed 6100/10000 images
+[2018-09-02 21:24:50.576] Processed 7100/10000 images
+[2018-09-02 21:24:50.734] Processed 8100/10000 images
+[2018-09-02 21:24:50.898] Processed 9100/10000 images
+[2018-09-02 21:24:51.074] Accuracy: 75.320000
+```
 
 **To re-run same testing without TFRecords preparation, use:**
 ```
 python3 imageclassifier_cli.py \
 -m tst \
 -r records/cifar_test_img.tfrecords \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
