@@ -220,10 +220,10 @@ Or if I want to train two different CIFAR models using different learning rates,
 ### Architectures
 
 Classes for neural network architectures are in **arch/arch.py**. Currently, the following are implemented:  
-* [__TFCNN__](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
-* __SimpleANN__ - Neural Net w/ Single Hidden Layer
-* __ImageLSTM__ - Basic LSTM RNN for Images
-* __ImageGRU__ - Basic GRU RNN Images
+* [_TFCNN_](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
+* _SimpleANN_ - Neural Net w/ Single Hidden Layer
+* _ImageLSTM_ - Basic LSTM RNN for Images
+* _ImageGRU_ - Basic GRU RNN for Images
 
 Other network architectures may be added. Just make sure to update **model_arch** in image_classifier.py  
 to add them as architecture option in CLI.  
