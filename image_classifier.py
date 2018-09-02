@@ -16,14 +16,22 @@ import common.constants as const
 
 model_arch = {
     'TFCNN' : arch.TFCNN,
-    'SimpleANN' : arch.SimpleANN
+    'SimpleANN' : arch.SimpleANN,
+    'ImageLSTM' : arch.ImageRNN,
+    'ImageGRU' : arch.ImageRNN,   
 }
 
 class ImageClassifier():
 
     def __init__(self, arch, mode, num_classes):
         # instantiate Model Architecture
-        self.__arch = model_arch[arch](mode, num_classes)
+
+        if model_arch[arch].__name__ == 'ImageRNN':
+            self.__arch = model_arch[arch](mode, num_classes, arch)
+        else:
+            self.__arch = model_arch[arch](mode, num_classes)
+
+        self.arch_name = arch
 
     def train(self, alias, records_file, num_data):
 
@@ -53,11 +61,11 @@ class ImageClassifier():
         saver  = tf.train.Saver()
 
         # initialize log file
-        log_file = ut.open_log_file(self.__arch.__class__.__name__, alias, 'trn')
+        log_file = ut.open_log_file(self.arch_name, alias, 'trn')
 
         processed_num = 0
         epoch_num = 1
-        num_steps = math.ceil(num_data / const.BATCH_SIZE) * const.NUM_EPOCHS
+        num_steps = math.ceil((num_data * const.NUM_EPOCHS) / const.BATCH_SIZE)
 
         with tf.Session() as sess:
             
@@ -67,7 +75,7 @@ class ImageClassifier():
                 % (num_data, const.NUM_EPOCHS))
 
             # 1 step is 1 batch
-            for step in range(0, num_steps):
+            for step in range(num_steps):
 
                 _, loss_val = sess.run([update_model, loss])
                 if step % const.NUM_BATCH_BEFORE_PRINT_LOSS == 0:
@@ -81,13 +89,13 @@ class ImageClassifier():
                     processed_num = 0
                     if epoch_num % const.NUM_EPOCH_BEFORE_CHKPT == 0 \
                         and epoch_num != const.NUM_EPOCHS:
-                        ut.save_model(epoch_num, self.__arch.__class__.__name__,
+                        ut.save_model(epoch_num, self.arch_name,
                             alias, saver, sess)
 
                     epoch_num += 1
 
             # save last model
-            ut.save_model(epoch_num - 1, self.__arch.__class__.__name__,
+            ut.save_model(epoch_num - 1, self.arch_name,
                 alias, saver, sess)
         
         log_file.close()
@@ -115,7 +123,7 @@ class ImageClassifier():
         saver  = tf.train.Saver()
 
         # initialize log file
-        log_file = ut.open_log_file(self.__arch.__class__.__name__, alias, 'tst')
+        log_file = ut.open_log_file(self.arch_name, alias, 'tst')
 
         num_steps = math.ceil(num_data / const.TST_BATCH_SIZE)
         correct = 0
@@ -128,7 +136,7 @@ class ImageClassifier():
                 "Starting classification. Using model in:\n%s" % (checkpoint_path))
             saver.restore(sess, checkpoint_path)
 
-            for step in range(0, num_steps):
+            for step in range(num_steps):
 
                 # get prediction and labels for this iteration
                 step_pred, step_labels = sess.run([pred, labels])
