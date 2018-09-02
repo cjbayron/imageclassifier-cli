@@ -75,8 +75,6 @@ optional arguments:
                          - optional; used only for tst and tst_prep
   -e MODEL_EPOCH        Epoch (load model saved at end of specific epoch)
                          - optional; used only for tst and tst_prep
-
-
 ```
 
 ### Modes
@@ -221,11 +219,11 @@ Or if I want to train two different CIFAR models using different learning rates,
 
 ### Architectures
 
-Classes for neural network architectures are in **arch/arch.py**. Currently, the following rare implemented:  
-* [TFCNN](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
-* SimpleANN - Neural Net w/ Single Hidden Layer
-* ImageLSTM - Basic LSTM RNN
-* ImageGRU - Basic GRU RNN
+Classes for neural network architectures are in **arch/arch.py**. Currently, the following are implemented:  
+* [__TFCNN__](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
+* __SimpleANN__ - Neural Net w/ Single Hidden Layer
+* __ImageLSTM__ - Basic LSTM RNN for Images
+* __ImageGRU__ - Basic GRU RNN Images
 
 Other network architectures may be added. Just make sure to update **model_arch** in image_classifier.py  
 to add them as architecture option in CLI.  
