@@ -3,7 +3,6 @@
 Image Classifier CLI
 """
 
-import tensorflow as tf
 import os
 from argparse import ArgumentParser
 from argparse import RawTextHelpFormatter
@@ -43,7 +42,7 @@ if __name__ == '__main__':
                                 + const.TRN_MODE + ', tst)')
     ARG_PARSER.add_argument('-a', dest='arch',
                             required=True,
-                            choices=[key for key in model_arch],
+                            choices=sorted([key for key in model_arch]),
                             help='Model Architecture to Use')
     ARG_PARSER.add_argument('-l', dest='alias',
                             required=True,
