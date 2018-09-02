@@ -225,7 +225,7 @@ Classes for neural network architectures are in **arch/arch.py**. Currently, the
 * _ImageLSTM_ - Basic LSTM RNN for Images
 * _ImageGRU_ - Basic GRU RNN for Images
 
-Other network architectures may be added. Just make sure to update **model_arch** in **image_classifier.py**  
+Other network architectures may be added. Just make sure to update **MODEL_ARCH** in **image_classifier.py**  
 to add them as architecture option in CLI.  
 
 ### Hyperparameters

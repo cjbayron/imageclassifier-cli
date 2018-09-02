@@ -5,15 +5,18 @@ Utilities
 Collection of utility functions
 """
 
-import tensorflow as tf
+import json
 import glob
 import os
 import random
-import common.constants as const
 import pathlib
-import numpy as np
-import json
 from datetime import datetime
+
+import numpy as np
+import tensorflow as tf
+
+import common.constants as const
+
 
 def get_randomized_image_list(data_dir):
     """
@@ -46,9 +49,9 @@ def get_randomized_image_list(data_dir):
 
     filenames = [filenames[idx] for idx in random_index]
     labels = [labels[idx] for idx in random_index]
-    
+
     # return a sorted list of distinct labels
-    # sorting is important to achieve consistency 
+    # sorting is important to achieve consistency
     # of intenger->class for training/testing set
     classes = sorted(list(set(labels)))
 
@@ -59,16 +62,16 @@ def map_labels_to_classes(labels, classes):
     Replaces string labels with integers and creates
     a dictionary that maps the string-to-integer relationship
     """
-    
+
     nd_labels = np.array(labels)
     class_map = {}
 
-    for int_label in range(len(classes)):
+    for int_label, class_name in enumerate(classes):
         # get all index where element is equal to class
-        class_idxs = np.where(nd_labels == classes[int_label])[0]
+        class_idxs = np.where(nd_labels == class_name)[0]
         nd_labels[class_idxs] = int_label
 
-        class_map[int_label] = classes[int_label]
+        class_map[int_label] = class_name
 
     labels = nd_labels.tolist()
     return labels, class_map
@@ -101,8 +104,8 @@ def dump_metadata(class_map, num_data, tf_rec_name):
     if not os.path.isdir(const.RECORDS_DIR):
         os.mkdir(const.RECORDS_DIR)
 
-    fn = tf_rec_name.replace(const.TF_REC_EXT, '.json')
-    fn = os.path.join(const.RECORDS_DIR, fn)
+    file_name = tf_rec_name.replace(const.TF_REC_EXT, '.json')
+    file_name = os.path.join(const.RECORDS_DIR, file_name)
 
     metadata = {
         'num_data': num_data,
@@ -110,10 +113,10 @@ def dump_metadata(class_map, num_data, tf_rec_name):
         'class_map': class_map
     }
 
-    with open(fn, 'w') as json_file:
+    with open(file_name, 'w') as json_file:
         json.dump(metadata, json_file)
 
-def save_as_TFRecord(filenames, labels, tf_rec_name, shape):
+def save_as_TFRecord(filenames, labels, tf_rec_name):
     """
     Save images and corresponding labels as TFRecords
 
@@ -127,10 +130,10 @@ def save_as_TFRecord(filenames, labels, tf_rec_name, shape):
     writer = tf.python_io.TFRecordWriter(os.path.join(const.RECORDS_DIR, tf_rec_name))
 
     # convert features to tf.train.Feature
-    for idx in range(len(filenames)):
+    for idx, filename in enumerate(filenames):
 
         # Read image as bytes
-        with tf.gfile.FastGFile(filenames[idx], 'rb') as file:
+        with tf.gfile.FastGFile(filename, 'rb') as file:
             image_data = file.read()
 
         # convert features/labels to Feature, then to Examples
@@ -203,10 +206,10 @@ def tfg_read_from_TFRecord(records_file, buf_size, batch_size):
     dataset = dataset.batch(batch_size)
 
     # create one-shot iterator
-    it = dataset.make_one_shot_iterator()
+    data_it = dataset.make_one_shot_iterator()
 
     # get features
-    image, label = it.get_next()
+    image, label = data_it.get_next()
 
     return image, label
 
@@ -236,35 +239,41 @@ def save_model(step, basename, alias, tf_saver, sess):
     print("Model saved in path: %s" % save_path)
 
 def open_log_file(arch, alias, mode):
+    """
+    Create log file
+    """
 
     if mode == 'trn':
-        base_fn = const.TRN_LOG_FILE
+        base_file_name = const.TRN_LOG_FILE
 
     elif mode == 'tst':
-        base_fn = const.TST_LOG_FILE
+        base_file_name = const.TST_LOG_FILE
 
     log_path = os.path.join(const.MODELS_FOLDER, arch,
-        "{0}_{1}_{2}_{3}".format(
-            datetime.today().strftime(const.DATETIME_FORMAT),
-            arch,
-            alias,
-            base_fn
-            ))
+                            "{0}_{1}_{2}_{3}".format(
+                                datetime.today().strftime(const.DATETIME_FORMAT),
+                                arch,
+                                alias,
+                                base_file_name
+                            ))
 
     create_parent_dirs_if_not_exist(log_path)
     log_file = open(log_path, 'w')
     return log_file
 
-def print_logs(file, str):
+def print_logs(file, str_to_print):
     """
     Add datetime then print to file and terminal
     """
 
-    dt = '[' + datetime.today().strftime(const.LOG_DATETIME_FORMAT)[:-3] + '] '
-    str = dt + str
+    dt_now = '[' + datetime.today().strftime(const.LOG_DATETIME_FORMAT)[:-3] + '] '
+    str_to_print = dt_now + str_to_print
 
-    file.write(str + '\n')
-    print(str)
+    file.write(str_to_print + '\n')
+    print(str_to_print)
 
 def create_parent_dirs_if_not_exist(path):
+    """
+    Create parent dir if not exist
+    """
     pathlib.Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)

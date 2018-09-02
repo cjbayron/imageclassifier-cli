@@ -5,43 +5,50 @@ Image Classifier
 This contains the ImageClassifier class.
 """
 
-import tensorflow as tf
-import os
 import math
 import numpy as np
+import tensorflow as tf
 
 import util.utilities as ut
 import arch.arch as arch
 import common.constants as const
 
-model_arch = {
+MODEL_ARCH = {
     'TFCNN' : arch.TFCNN,
     'SimpleANN' : arch.SimpleANN,
     'ImageLSTM' : arch.ImageRNN,
-    'ImageGRU' : arch.ImageRNN,   
+    'ImageGRU' : arch.ImageRNN,
 }
 
 class ImageClassifier():
+    """
+    ImageClassifier Class
 
-    def __init__(self, arch, mode, num_classes):
+    This contains the methods for Training and Testing
+    """
+
+    def __init__(self, arch_name, mode, num_classes):
         # instantiate Model Architecture
 
-        if model_arch[arch].__name__ == 'ImageRNN':
-            self.__arch = model_arch[arch](mode, num_classes, arch)
+        if MODEL_ARCH[arch_name].__name__ == 'ImageRNN':
+            self.__arch = MODEL_ARCH[arch_name](mode, num_classes, arch_name)
         else:
-            self.__arch = model_arch[arch](mode, num_classes)
+            self.__arch = MODEL_ARCH[arch_name](mode, num_classes)
 
-        self.arch_name = arch
+        self.arch_name = arch_name
 
-    def train(self, alias, records_file, num_data):
-
+    def __get_optimizer(self, records_file, num_data):
         """
-        TRAINING GRAPH: START
+        Get graph for model training
         """
+
+        ###
+        # TRAINING GRAPH: START
+        ###
 
         # read from TFRecords
         image, label = ut.tfg_read_from_TFRecord(records_file, num_data,
-            const.BATCH_SIZE)
+                                                 const.BATCH_SIZE)
 
         # feed image to network
         logits = self.__arch.tfg_network(image)
@@ -53,12 +60,21 @@ class ImageClassifier():
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=const.LRN_RATE)
         update_model = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
 
+        ###
+        # TRAINING GRAPH: END
+        ###
+
+        return update_model, loss
+
+    def train(self, alias, records_file, num_data):
         """
-        TRAINING GRAPH: END
+        Perform model training
         """
 
+        update_model, loss = self.__get_optimizer(records_file, num_data)
+
         init = tf.global_variables_initializer() # IMPORTANT
-        saver  = tf.train.Saver()
+        saver = tf.train.Saver()
 
         # initialize log file
         log_file = ut.open_log_file(self.arch_name, alias, 'trn')
@@ -68,59 +84,62 @@ class ImageClassifier():
         num_steps = math.ceil((num_data * const.NUM_EPOCHS) / const.BATCH_SIZE)
 
         with tf.Session() as sess:
-            
+
             sess.run(init)
 
-            print("Training on %d images for %d epochs..." 
-                % (num_data, const.NUM_EPOCHS))
+            print("Training on %d images for %d epochs..."
+                  % (num_data, const.NUM_EPOCHS))
 
             # 1 step is 1 batch
             for step in range(num_steps):
 
                 _, loss_val = sess.run([update_model, loss])
                 if step % const.NUM_BATCH_BEFORE_PRINT_LOSS == 0:
-                    ut.print_logs(log_file, "Epoch: %d/%d, Processed: %d/%d,"
-                        " Loss: %f" % (epoch_num, const.NUM_EPOCHS,
-                                       processed_num, num_data, loss_val))
+                    ut.print_logs(log_file, "Epoch: %d/%d, Processed: %d/%d, Loss: %f"
+                                             % (epoch_num, const.NUM_EPOCHS,
+                                                processed_num, num_data, loss_val))
 
                 # update counters and save model
                 processed_num += const.BATCH_SIZE
                 if processed_num >= num_data:
-                    processed_num = processed_num % const.BATCH_SIZE
+                    processed_num = processed_num % num_data
                     if epoch_num % const.NUM_EPOCH_BEFORE_CHKPT == 0 \
                         and epoch_num != const.NUM_EPOCHS:
                         ut.save_model(epoch_num, self.arch_name,
-                            alias, saver, sess)
+                                      alias, saver, sess)
 
                     epoch_num += 1
 
             # save last model
             ut.save_model(epoch_num - 1, self.arch_name,
-                alias, saver, sess)
-        
+                          alias, saver, sess)
+
         log_file.close()
 
     def classify(self, records_file, checkpoint_path, alias, num_data):
+        """
+        Perform model testing
+        """
 
-        """
-        TESTING GRAPH: START
-        """
+        ###
+        # TESTING GRAPH: START
+        ###
 
         # read from TFRecords
         image, labels = ut.tfg_read_from_TFRecord(records_file, num_data,
-            const.TST_BATCH_SIZE)
+                                                  const.TST_BATCH_SIZE)
 
         # feed image to network
         logits = self.__arch.tfg_network(image)
         softmax = tf.nn.softmax(logits=logits)
         pred = tf.argmax(softmax, axis=1)
 
-        """
-        TESTING GRAPH: END
-        """
+        ###
+        # TESTING GRAPH: END
+        ###
 
         init = tf.global_variables_initializer() # IMPORTANT
-        saver  = tf.train.Saver()
+        saver = tf.train.Saver()
 
         # initialize log file
         log_file = ut.open_log_file(self.arch_name, alias, 'tst')
@@ -129,25 +148,28 @@ class ImageClassifier():
         correct = 0
 
         with tf.Session() as sess:
-            
+
             sess.run(init)
 
             ut.print_logs(log_file,
-                "Starting classification. Using model in:\n%s" % (checkpoint_path))
+                          "Starting classification. "
+                          + "Using model in:\n%s" % (checkpoint_path))
+
             saver.restore(sess, checkpoint_path)
 
             for step in range(num_steps):
 
                 # get prediction and labels for this iteration
                 step_pred, step_labels = sess.run([pred, labels])
-                
+
                 # compare prediction and label
                 correct += np.sum(step_pred == step_labels)
 
                 if step % const.NUM_BATCH_BEFORE_PRINT == 0:
-                    ut.print_logs(log_file, 
-                        "Processed %d/%d images" % ((step + 1)*const.TST_BATCH_SIZE,
-                        num_data))
+                    ut.print_logs(log_file,
+                                  "Processed %d/%d images"
+                                  % ((step + 1)*const.TST_BATCH_SIZE,
+                                     num_data))
 
             acc = (correct / num_data) * 100
             ut.print_logs(log_file, "Accuracy: %f" % (acc))

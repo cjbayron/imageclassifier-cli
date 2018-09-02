@@ -6,8 +6,8 @@ This contains clasess of different Neural Network architectures.
 For each class, the actual network is defined by tfg_network().
 """
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 import common.constants as const
 
 class TFCNN():
@@ -21,6 +21,9 @@ class TFCNN():
         self.__num_labels = num_labels
 
     def tfg_network(self, features):
+        """
+        Neural Network Architecture for TFCNN
+        """
 
         input_dim = [-1] # for batch size
         input_dim.extend(const.IMG_SHAPE)
@@ -65,8 +68,8 @@ class TFCNN():
 
         # Dropout
         dropout = tf.layers.dropout(
-            inputs=dense, 
-            rate=0.4, 
+            inputs=dense,
+            rate=0.4,
             training=(self.__mode == const.TRN_MODE))
 
         # Logits Layer
@@ -87,6 +90,9 @@ class SimpleANN():
         self.__num_labels = num_labels
 
     def tfg_network(self, features):
+        """
+        Neural Network Architecture for SimpleANN
+        """
 
         # Input Layer (Flattened)
         input_layer = tf.reshape(features, [-1, np.prod(const.IMG_SHAPE)])
@@ -108,7 +114,7 @@ class SimpleANN():
 class ImageRNN():
     """
     ImageRNN: RNN for Image Classification
-    
+
     The idea here is to treat each row of an image as data for a single time step,
     and the number of columns i.e. height of image is treated as no. of sequences.
 
@@ -122,6 +128,9 @@ class ImageRNN():
         self.__cell = cell
 
     def tfg_network(self, features):
+        """
+        Neural Network Architecture for ImageRNN (ImageLSTM/ImageGRU)
+        """
 
         num_steps = const.IMG_SHAPE[0]
 
@@ -153,7 +162,7 @@ class ImageRNN():
         # each step of our sequence to be of same size
         outputs, state = tf.nn.static_rnn(cell, input_layer, dtype=tf.float32)
 
-        # for Static RNN vs Dynamic RNN see: 
+        # for Static RNN vs Dynamic RNN see:
         # https://stackoverflow.com/questions/43100981/what-is-a-dynamic-rnn-in-tensorflow
 
         # "outputs" is a list of outputs at each time_step, so we only pick the last
