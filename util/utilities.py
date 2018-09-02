@@ -32,7 +32,6 @@ def get_randomized_image_list(data_dir):
     filenames = []
     labels = []
 
-    data_dir = data_dir.strip('./')
     # get list of images
     filenames = glob.glob(os.path.join(data_dir, '*/*' + const.IMG_EXT))
 
@@ -83,16 +82,13 @@ def convert_to_feature(value, feature_type):
     value = [value]
 
     if feature_type == 'int64':
-        feature = \
-            tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+        feature = tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
     elif feature_type == 'bytes':
-        feature = \
-            tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
+        feature = tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
 
     else:
-        error_msg = "Feature not supported!"
-        raise Exception(error_msg)
+        raise Exception("Feature not supported!")
 
     return feature
 
@@ -188,6 +184,9 @@ def tfg_read_from_TFRecord(records_file, buf_size, batch_size):
     and creates an Iterator for consuming a batch of the Dataset
     """
 
+    if buf_size == 0:
+        raise Exception("TFRecordDataset Shuffle Buffer Size must not be 0!")
+
     # create dataset from TFRecords
     dataset = tf.data.TFRecordDataset(records_file)
 
@@ -258,8 +257,12 @@ def open_log_file(arch, alias, mode):
 
 def print_logs(file, str):
     """
-    Print to file and terminal
+    Add datetime then print to file and terminal
     """
+
+    dt = '[' + datetime.today().strftime(const.LOG_DATETIME_FORMAT)[:-3] + '] '
+    str = dt + str
+
     file.write(str + '\n')
     print(str)
 
