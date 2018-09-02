@@ -107,6 +107,8 @@ venv.bak/
 data/*
 models/*
 records/*
+misc/*
+
 
 # keep folders
 !data/.gitkeep

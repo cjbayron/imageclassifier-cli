@@ -14,7 +14,7 @@ An easy-to-use CLI tool for training and testing image classifiers.
 
 ### Prerequisites
 
-* Python 3.5.2
+* Python3
 * Numpy
 * TensorFlow
 
@@ -51,8 +51,9 @@ You should see the following:
 
 ```
 usage: imageclassifier_cli.py [-h] -m {trn_prep,tst_prep,trn,tst}
-                              [-d DATA_DIR] -r TF_REC -a {TFCNN,SimpleANN} -l
-                              ALIAS [-s MODEL_DIR] [-e MODEL_EPOCH]
+                              [-d DATA_DIR] -r TF_REC -a
+                              {ImageGRU,ImageLSTM,SimpleANN,TFCNN} -l ALIAS
+                              [-s MODEL_DIR] [-e MODEL_EPOCH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -67,13 +68,13 @@ optional arguments:
   -r TF_REC             TFRecords file
                          - NAME of TFRecords file to be created (for trn_prep, tst_prep)
                          - PATH of TFRecords file to be used (for trn, tst)
-  -a {TFCNN,SimpleANN}  Model Architecture to Use
+  -a {ImageGRU,ImageLSTM,SimpleANN,TFCNN}
+                        Model Architecture to Use
   -l ALIAS              Alias for trained model (e.g. name of data)
   -s MODEL_DIR          Location of Saved Model
                          - optional; used only for tst and tst_prep
   -e MODEL_EPOCH        Epoch (load model saved at end of specific epoch)
                          - optional; used only for tst and tst_prep
-
 ```
 
 ### Modes
@@ -83,8 +84,8 @@ optional arguments:
 3. *trn* - Perform training. Saves trained model in models/
 4. *tst* - Perform testing. Loads trained model, classifies test data, and prints accuracy
 
-When using the 'prep' modes, you have to specify the location of data (via -d) which you will format into TFRecords.  
-When using 'non-prep' modes, you have to specify location of TFRecords (via -r).
+When using the 'prep' modes, you have to specify the location of data (via **-d**) which you will format into TFRecords.  
+When using 'non-prep' modes, you have to specify location of TFRecords (via **-r**).
 
 ### Training
 
@@ -92,23 +93,26 @@ First of all, you have to gather and organize your image data!
 This CLI expects the following directory structure for DATA_DIR (location of images):
 
 ```
-DATA_DIR/<class0>/image1.png
-DATA_DIR/<class0>/image2.png
+DATA_DIR
+│
+├── <class0>
+│   ├── image1.png
+│   ├── image2.png
+│   ...
+│   └── imageN.png
+│
+├── <class1>
+│   ├── image1.png
+│   ├── image2.png
+│   ...
+│   └── imageN.png
 ...
-DATA_DIR/<class0>/imageN.png
-
-DATA_DIR/<class1>/image1.png
-DATA_DIR/<class1>/image2.png
-...
-DATA_DIR/<class1>/imageN.png
-
-...
-...
-
-DATA_DIR/<classN>/image1.png
-DATA_DIR/<classN>/image2.png
-...
-DATA_DIR/<classN>/imageN.png
+│
+└── <classN>
+    ├── image1.png
+    ├── image2.png
+    ...
+    └── imageN.png
 ```
 
 As mentioned, this CLI assumes all these images to be of same size.  
@@ -133,25 +137,45 @@ python3 imageclassifier_cli.py \
 -m trn_prep \
 -d data/cifar/train \
 -r cifar_train_img \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
 The above command will do the following:
-1. Collect all images in data/cifar/train along with their corresponding labels  
-and store them in TFRecords file format in records/cifar_train_img.tfrecords
-2. Train image model with "SimpleANN" architecture (see arch/arch.py) using data in TFRecords file  
+1. Collect all images in *data/cifar/train* along with their corresponding labels  
+and store them in TFRecords file format in *records/cifar_train_img.tfrecords*
+2. Train image model with *TFCNN* architecture (see **arch/arch.py**) using data in TFRecords file  
     - the number of Epoch, Processed Images, and Loss value are printed
 3. Save trained model in following path:  
-*models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
+*models/TFCNN/\<datetime\>\_TFCNN\_cifar\_\<epoch\>.mdl.data*
     - the number of saved models may be varied in **common/constants.py**
+
+**Sample output:**
+```
+Found 50000 images. Creating TF records... 
+Done.
+Training on 50000 images for 5 epochs...
+[2018-09-02 20:59:40.869] Epoch: 1/5, Processed: 0/50000, Loss: 3.386968
+[2018-09-02 20:59:41.252] Epoch: 1/5, Processed: 3200/50000, Loss: 1.743668
+[2018-09-02 20:59:41.638] Epoch: 1/5, Processed: 6400/50000, Loss: 2.058634
+[2018-09-02 20:59:42.035] Epoch: 1/5, Processed: 9600/50000, Loss: 1.742383
+[2018-09-02 20:59:42.428] Epoch: 1/5, Processed: 12800/50000, Loss: 1.573048
+...
+
+[2018-09-02 21:21:44.043] Epoch: 20/20, Processed: 35600/50000, Loss: 0.049832
+[2018-09-02 21:21:45.492] Epoch: 20/20, Processed: 38800/50000, Loss: 0.039704
+[2018-09-02 21:21:46.948] Epoch: 20/20, Processed: 42000/50000, Loss: 0.117836
+[2018-09-02 21:21:48.396] Epoch: 20/20, Processed: 45200/50000, Loss: 0.006848
+[2018-09-02 21:21:49.842] Epoch: 20/20, Processed: 48400/50000, Loss: 0.029094
+Model saved in path: models/TFCNN/20180902_2121_TFCNN_cifar_20.mdl
+```
 
 **To re-run same training without TFRecords preparation, use:**
 ```
 python3 imageclassifier_cli.py \
 -m trn \
 -r records/cifar_train_img.tfrecords \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
@@ -165,25 +189,44 @@ python3 imageclassifier_cli.py \
 -m tst_prep \
 -d data/cifar/test \
 -r cifar_test_img \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
 The above command will do the following:
-1. Collect all images in data/cifar/test along with their corresponding labels  
-and store them in TFRecords file format in records/cifar_test_img.tfrecords
+1. Collect all images in *data/cifar/test* along with their corresponding labels  
+and store them in TFRecords file format in *records/cifar_test_img.tfrecords*
 2. Load pre-trained image model with latest epoch in following path:  
-*models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
+*models/TFCNN/\<datetime\>\_TFCNN\_cifar\_\<epoch\>.mdl.data*
 3. Classify data in TFRecords file using loaded model
     - number of processed images is printed during execution
 4. Print (and save to log file) the accuracy
+
+**Sample output:**
+```
+Found 10000 images. Creating TF records... 
+Done.
+[2018-09-02 21:24:47.251] Starting classification. Using model in:
+models/TFCNN/20180902_2121_TFCNN_cifar_20.mdl
+[2018-09-02 21:24:49.584] Processed 100/10000 images
+[2018-09-02 21:24:49.728] Processed 1100/10000 images
+[2018-09-02 21:24:49.866] Processed 2100/10000 images
+[2018-09-02 21:24:50.005] Processed 3100/10000 images
+[2018-09-02 21:24:50.144] Processed 4100/10000 images
+[2018-09-02 21:24:50.281] Processed 5100/10000 images
+[2018-09-02 21:24:50.418] Processed 6100/10000 images
+[2018-09-02 21:24:50.576] Processed 7100/10000 images
+[2018-09-02 21:24:50.734] Processed 8100/10000 images
+[2018-09-02 21:24:50.898] Processed 9100/10000 images
+[2018-09-02 21:24:51.074] Accuracy: 75.320000
+```
 
 **To re-run same testing without TFRecords preparation, use:**
 ```
 python3 imageclassifier_cli.py \
 -m tst \
 -r records/cifar_test_img.tfrecords \
--a SimpleANN \
+-a TFCNN \
 -l cifar
 ```
 
@@ -213,10 +256,16 @@ Or if I want to train two different CIFAR models using different learning rates,
 * You're telling the program to use the model saved at epoch *num* for testing.  
 (You may save the model at specific epoch intervals via **NUM_EPOCH_BEFORE_CHKPT** in **common/constants.py**)
 
-### Adding architectures
+### Architectures
 
-Other network architectures may be added through **arch/arch.py**.  
-Make sure to update **model_arch** in image_classifier.py to add it as an architecture option in CLI.
+Classes for neural network architectures are in **arch/arch.py**. Currently, the following are implemented:  
+* [_TFCNN_](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
+* _SimpleANN_ - Neural Net w/ Single Hidden Layer
+* _ImageLSTM_ - Basic LSTM RNN for Images
+* _ImageGRU_ - Basic GRU RNN for Images
+
+Other network architectures may be added. Just make sure to update **MODEL_ARCH** in **image_classifier.py**  
+to add them as architecture option in CLI.  
 
 ### Hyperparameters
 
