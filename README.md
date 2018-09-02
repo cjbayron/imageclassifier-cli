@@ -84,8 +84,8 @@ optional arguments:
 3. *trn* - Perform training. Saves trained model in models/
 4. *tst* - Perform testing. Loads trained model, classifies test data, and prints accuracy
 
-When using the 'prep' modes, you have to specify the location of data (via -d) which you will format into TFRecords.  
-When using 'non-prep' modes, you have to specify location of TFRecords (via -r).
+When using the 'prep' modes, you have to specify the location of data (via **-d**) which you will format into TFRecords.  
+When using 'non-prep' modes, you have to specify location of TFRecords (via **-r**).
 
 ### Training
 
@@ -142,9 +142,9 @@ python3 imageclassifier_cli.py \
 ```
 
 The above command will do the following:
-1. Collect all images in data/cifar/train along with their corresponding labels  
-and store them in TFRecords file format in records/cifar_train_img.tfrecords
-2. Train image model with "SimpleANN" architecture (see arch/arch.py) using data in TFRecords file  
+1. Collect all images in *data/cifar/train* along with their corresponding labels  
+and store them in TFRecords file format in *records/cifar_train_img.tfrecords*
+2. Train image model with *SimpleANN* architecture (see **arch/arch.py**) using data in TFRecords file  
     - the number of Epoch, Processed Images, and Loss value are printed
 3. Save trained model in following path:  
 *models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
@@ -174,8 +174,8 @@ python3 imageclassifier_cli.py \
 ```
 
 The above command will do the following:
-1. Collect all images in data/cifar/test along with their corresponding labels  
-and store them in TFRecords file format in records/cifar_test_img.tfrecords
+1. Collect all images in *data/cifar/test* along with their corresponding labels  
+and store them in TFRecords file format in *records/cifar_test_img.tfrecords*
 2. Load pre-trained image model with latest epoch in following path:  
 *models/SimpleANN/\<datetime\>\_SimpleANN\_cifar\_\<epoch\>.mdl.data*
 3. Classify data in TFRecords file using loaded model
@@ -225,7 +225,7 @@ Classes for neural network architectures are in **arch/arch.py**. Currently, the
 * _ImageLSTM_ - Basic LSTM RNN for Images
 * _ImageGRU_ - Basic GRU RNN for Images
 
-Other network architectures may be added. Just make sure to update **model_arch** in image_classifier.py  
+Other network architectures may be added. Just make sure to update **model_arch** in **image_classifier.py**  
 to add them as architecture option in CLI.  
 
 ### Hyperparameters
