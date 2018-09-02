@@ -51,8 +51,9 @@ You should see the following:
 
 ```
 usage: imageclassifier_cli.py [-h] -m {trn_prep,tst_prep,trn,tst}
-                              [-d DATA_DIR] -r TF_REC -a {TFCNN,SimpleANN} -l
-                              ALIAS [-s MODEL_DIR] [-e MODEL_EPOCH]
+                              [-d DATA_DIR] -r TF_REC -a
+                              {ImageGRU,ImageLSTM,SimpleANN,TFCNN} -l ALIAS
+                              [-s MODEL_DIR] [-e MODEL_EPOCH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -67,12 +68,14 @@ optional arguments:
   -r TF_REC             TFRecords file
                          - NAME of TFRecords file to be created (for trn_prep, tst_prep)
                          - PATH of TFRecords file to be used (for trn, tst)
-  -a {TFCNN,SimpleANN}  Model Architecture to Use
+  -a {ImageGRU,ImageLSTM,SimpleANN,TFCNN}
+                        Model Architecture to Use
   -l ALIAS              Alias for trained model (e.g. name of data)
   -s MODEL_DIR          Location of Saved Model
                          - optional; used only for tst and tst_prep
   -e MODEL_EPOCH        Epoch (load model saved at end of specific epoch)
                          - optional; used only for tst and tst_prep
+
 
 ```
 
@@ -216,10 +219,16 @@ Or if I want to train two different CIFAR models using different learning rates,
 * You're telling the program to use the model saved at epoch *num* for testing.  
 (You may save the model at specific epoch intervals via **NUM_EPOCH_BEFORE_CHKPT** in **common/constants.py**)
 
-### Adding architectures
+### Architectures
 
-Other network architectures may be added through **arch/arch.py**.  
-Make sure to update **model_arch** in image_classifier.py to add it as an architecture option in CLI.
+Classes for neural network architectures are in **arch/arch.py**. Currently, the following rare implemented:  
+* [TFCNN](https://www.tensorflow.org/tutorials/estimators/cnn) - TensorFlow CNN Architecture
+* SimpleANN - Neural Net w/ Single Hidden Layer
+* ImageLSTM - Basic LSTM RNN
+* ImageGRU - Basic GRU RNN
+
+Other network architectures may be added. Just make sure to update **model_arch** in image_classifier.py  
+to add them as architecture option in CLI.  
 
 ### Hyperparameters
 
