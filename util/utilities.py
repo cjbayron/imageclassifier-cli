@@ -32,23 +32,17 @@ def get_randomized_image_list(data_dir):
     also returns a list of the unique labels (classes).
     """
 
-    filenames = []
-    labels = []
-
     # get list of images
     filenames = glob.glob(os.path.join(data_dir, '*/*' + const.IMG_EXT))
 
     # Construct the list of image files and labels
-    for filename in filenames:
-        labels.append(os.path.basename(os.path.dirname(filename)))
+    labels = [os.path.basename(os.path.dirname(fn)) for fn in filenames]
 
     # Randomize sequence of images
-    random_index = list(range(len(filenames)))
+    img_lbl_pairs = list(zip(filenames, labels))
     random.seed()
-    random.shuffle(random_index)
-
-    filenames = [filenames[idx] for idx in random_index]
-    labels = [labels[idx] for idx in random_index]
+    random.shuffle(img_lbl_pairs)
+    filenames[:], labels[:] = zip(*img_lbl_pairs)
 
     # return a sorted list of distinct labels
     # sorting is important to achieve consistency
